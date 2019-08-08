@@ -115,8 +115,7 @@ def callback_generator(api_name, method_name, params):
         global CALLED_METHOD_NAME
         CALLED_METHOD_NAME = method_name
         global CALLED_ARGS_LIST
-        for param in params:
-            CALLED_ARGS_LIST = (*CALLED_ARGS_LIST, param)
+        CALLED_ARGS_LIST = params
     return subparser_callback
 
 
@@ -155,7 +154,11 @@ def main():
 
     api_name = CALLED_API_NAME
     method_name = CALLED_METHOD_NAME
-    params = CALLED_ARGS_LIST
+    params_name = CALLED_ARGS_LIST
+
+    params = ()
+    for param_name in params_name:
+        params = (*params, getattr(args, param_name))
 
     try:
         print(api_manager.get_api_method(api_name, method_name)(*params, **dict()))
