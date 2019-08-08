@@ -72,6 +72,7 @@ $ ./open-api-cli.py StoreApi get_inventory
 
 ## TODO
 
+- Cast param to the good type
 - Handle authentication:
     - API key
     - Oauth
