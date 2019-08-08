@@ -95,3 +95,6 @@ $ ./open-api-cli.py StoreApi get_inventory
   - Oauth
   - Basic or Digest ?
 - add help for argument format (API Models)
+- add unit tests
+- add a better way to integrate with generated code
+- add a ̀`requirements.txt` ?
