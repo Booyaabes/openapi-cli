@@ -2,6 +2,7 @@
 # PYTHON_ARGCOMPLETE_OK
 
 import argparse
+import json
 import argcomplete
 from argcomplete import SuppressCompleter
 from swagger_client import api as api_list
@@ -125,6 +126,10 @@ def main():
 
     parser = argparse.ArgumentParser(description='Rest API command line interface.')
     # parser.add_argument('-t', '--access_token', help='The bearer token').completer = SuppressCompleter
+    parser.add_argument('-X', '--proxy', help='Proxy url (for example: \'http://localhost:8080\')')
+    parser.add_argument('-k', '--insecure', help='Disable SSL verification (use at your own risks!)',
+                        action='store_true')
+    parser.add_argument('-v', '--verbose', help='Display debug infos', action='store_true')
 
     subparsers = parser.add_subparsers(title='API',
                                        description='The API you want to interact with',
@@ -142,9 +147,10 @@ def main():
             param_list = []
             for param in method_param:
                 api_subparser.add_argument('--' + param['name'].lower(),
-                                           help=param['description'] + '  (type: ' + param['type'] + ')',
+                                           help='' + param['description'] + '  (type: ' + param['type'] + ')',
                                            required=True)
-                param_list.append(param['name'].lower())
+                param_list.append({'name': param['name'].lower(),
+                                   'type': param['type']})
 
             api_subparser.set_defaults(func=callback_generator(api_choice, api_method, param_list))
 
@@ -154,11 +160,22 @@ def main():
 
     api_name = CALLED_API_NAME
     method_name = CALLED_METHOD_NAME
-    params_name = CALLED_ARGS_LIST
+    param_list = CALLED_ARGS_LIST
+    proxy = args.proxy
+
+    configuration = swagger_client.Configuration()
+    configuration.proxy = proxy
+    configuration.verify_ssl = False if args.insecure else True
+    configuration.debug = False if args.verbose else True
+    api_manager = ApiManager(configuration)
 
     params = ()
-    for param_name in params_name:
-        params = (*params, getattr(args, param_name))
+    for param in param_list:
+        value = getattr(args, param['name'])
+        if param['type'] == 'str':
+            params = (*params, value)
+        else:
+            params = (*params, json.loads(value))
 
     try:
         print(api_manager.get_api_method(api_name, method_name)(*params, **dict()))

@@ -8,6 +8,12 @@ From an OpenAPI / Swagger you can generate a Python client. OpenAPI CLI is inten
 
 From an OpenAPI / Swagger generate a Python client. Add `open-api.cli.py` from the current repository to the generated client. You can now acces your API from your bash and pipe result to anything you want! Use tab for autocompletion.
 
+## Security Disclaimer
+
+__Reminder__: If the OpenAPI/Swagger spec is obtained from an untrusted source, please make sure you've reviewed the spec before using Swagger Codegen to generate the API client, server stub or documentation as code injection may occur.
+
+Don't expose your `open-api-cli.py` to not trusted user as one can inject Python object from command line arguments.
+
 ## Bash completion activation
 
 This project use [argcomplete](https://pypi.org/project/argcomplete/) to achieve bash completion. Please read argcomplete documentation about completion activation.
@@ -20,12 +26,16 @@ Help displays available API:
 
 ```sh
 $ ./open-api-cli.py --help
-usage: open-api-cli.py [-h] {PetApi,StoreApi,UserApi} ...
+usage: open-api-cli.py [-h] [-X PROXY] [-k] [-v] {PetApi,StoreApi,UserApi} ...
 
 Rest API command line interface.
 
 optional arguments:
   -h, --help            show this help message and exit
+  -X PROXY, --proxy PROXY
+                        Proxy url (for example: 'http://localhost:8080')
+  -k, --insecure        Disable SSL verification (use at your own risks!)
+  -v, --verbose         Display debug infos
 
 API:
   The API you want to interact with
@@ -90,11 +100,16 @@ $ ./open-api-cli.py StoreApi get_inventory
 
 ## TODO
 
+- ~~add the possibility to pass JSON object as cli arguement,~~
 - Handle authentication:
   - API key
   - Oauth
   - Basic or Digest ?
+  - Cookie based auth?
 - add help for argument format (API Models)
 - add unit tests
+- ~~add debug mode~~
+- ~~add proxy support~~
+- ~~add the possibility to disable SSL verification~~
 - add a better way to integrate with generated code
 - add a ̀`requirements.txt` ?
