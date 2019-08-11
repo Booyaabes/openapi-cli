@@ -152,7 +152,7 @@ api_manager = None
 
 
 def display_model_help(model_name):
-    model_swagger_definition = api_manager.model_manager.get_model_swagger_definition(CALLED_TYPE)
+    model_swagger_definition = api_manager.model_manager.get_model_swagger_definition(model_name)
     print(json.dumps(model_swagger_definition, indent=4))
 
 
@@ -204,23 +204,22 @@ def main():
     api_choice_list = api_manager.get_api_list()
 
     parser = argparse.ArgumentParser(description='Rest API command line interface.')
-    parser.add_argument('-X', '--proxy', help='Proxy url (for example: \'http://localhost:8080\')')
-    parser.add_argument('-k', '--insecure', help='Disable SSL verification (use at your own risks!)',
-                        action='store_true')
-    parser.add_argument('-v', '--verbose', help='Display debug infos', action='store_true')
-
-    authentication_group = parser.add_mutually_exclusive_group(required=False)
-    authentication_group.add_argument('--access_token', help='Access token')
-    authentication_group.add_argument('--basic',
-                                      help='Basic authentication. Format: \'{\'username\': '
-                                           '\'the_user_name\', \'password\': \'the_password\'}\'')
-    authentication_group.add_argument('--api_key', help='The API Key.')
 
     subparsers = parser.add_subparsers(title='Command',
                                        description='The command',
                                        required=True)
 
     api_parsers = subparsers.add_parser('api')
+    api_parsers.add_argument('-X', '--proxy', help='Proxy url (for example: \'http://localhost:8080\')')
+    api_parsers.add_argument('-k', '--insecure', help='Disable SSL verification (use at your own risks!)',
+                             action='store_true')
+    api_parsers.add_argument('-v', '--verbose', help='Display debug infos', action='store_true')
+    authentication_group = api_parsers.add_mutually_exclusive_group(required=False)
+    authentication_group.add_argument('--access_token', help='Access token')
+    authentication_group.add_argument('--basic',
+                                      help='Basic authentication. Format: \'{\'username\': '
+                                           '\'the_user_name\', \'password\': \'the_password\'}\'')
+    authentication_group.add_argument('--api_key', help='The API Key.')
     apis_subparsers = api_parsers.add_subparsers(title='API',
                                                  description='The API you want to interact with',
                                                  required=True)
