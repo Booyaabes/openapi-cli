@@ -26,9 +26,57 @@ Help displays available API:
 
 ```sh
 $ ./open-api-cli.py --help
-usage: open-api-cli.py [-h] [-X PROXY] [-k] [-v] {PetApi,StoreApi,UserApi} ...
+usage: open-api-cli.py [-h] {api,model} ...
 
 Rest API command line interface.
+
+optional arguments:
+  -h, --help   show this help message and exit
+
+Command:
+  The command
+
+  {api,model}
+```
+
+Type help displays defined types:
+
+```sh
+$ ./open-api-cli.py model --help
+usage: open-api-cli.py model [-h]
+                             {ApiResponse,Body,Body1,Category,Order,Pet,Tag,User}
+                             ...
+
+optional arguments:
+  -h, --help            show this help message and exit
+
+Model helper:
+  Model helper: display model expected format
+
+  {ApiResponse,Body,Body1,Category,Order,Pet,Tag,User}
+```
+
+Display Pet type format:
+
+```sh
+$ ./open-api-cli.py model Pet
+{
+    "id": "int",
+    "category": "Category",
+    "name": "str",
+    "photo_urls": "list[str]",
+    "tags": "list[Tag]",
+    "status": "str"
+}
+```
+
+Display the help to select an API:
+
+```sh
+$ ./open-api-cli.py api --help
+usage: open-api-cli.py api [-h] [-X PROXY] [-k] [-v]
+                           [--access_token ACCESS_TOKEN | --basic BASIC | --api_key API_KEY]
+                           {PetApi,StoreApi,UserApi} ...
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -36,6 +84,11 @@ optional arguments:
                         Proxy url (for example: 'http://localhost:8080')
   -k, --insecure        Disable SSL verification (use at your own risks!)
   -v, --verbose         Display debug infos
+  --access_token ACCESS_TOKEN
+                        Access token
+  --basic BASIC         Basic authentication. Format: '{'username':
+                        'the_user_name', 'password': 'the_password'}'
+  --api_key API_KEY     The API Key.
 
 API:
   The API you want to interact with
@@ -46,10 +99,10 @@ API:
 API help displays available actions:
 
 ```sh
-$ ./open-api-cli.py PetApi --help
-usage: open-api-cli.py PetApi [-h]
-                              {add_pet,delete_pet,find_pets_by_status,find_pets_by_tags,get_pet_by_id,update_pet,update_pet_with_form,upload_file}
-                              ...
+$ ./open-api-cli.py api PetApi --help
+usage: open-api-cli.py api PetApi [-h]
+                                  {add_pet,delete_pet,find_pets_by_status,find_pets_by_tags,get_pet_by_id,update_pet,update_pet_with_form,upload_file}
+                                  ...
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -73,8 +126,8 @@ Method:
 Action help displays arguments:
 
 ```sh
-$ ./open-api-cli.py PetApi get_pet_by_id --help
-usage: open-api-cli.py PetApi get_pet_by_id [-h] --pet_id PET_ID
+./open-api-cli.py api PetApi get_pet_by_id --help
+usage: open-api-cli.py api PetApi get_pet_by_id [-h] --pet_id PET_ID
 
 optional arguments:
   -h, --help       show this help message and exit
@@ -84,7 +137,7 @@ optional arguments:
 Example of usages, and return values:
 
 ```sh
-$ ./open-api-cli.py PetApi get_pet_by_id --pet_id 1
+$ ./open-api-cli.py api PetApi get_pet_by_id --pet_id 1
 {'category': {'id': 1, 'name': 'string'},
  'id': 1,
  'name': 'cat',
@@ -94,7 +147,7 @@ $ ./open-api-cli.py PetApi get_pet_by_id --pet_id 1
 ```
 
 ```sh
-$ ./open-api-cli.py StoreApi get_inventory
+$ ./open-api-cli.py api StoreApi get_inventory
 {'sold': 193, 'ksks': 1, 'c': 1, 'string': 1, 'Operated': 4, 'unavailable': 2, 'velit ': 1, 'Nonavailable': 1, 'pending': 175, 'Not-Operated': 10, 'available': 345, 'PENDING': 1, 'Not Found': 1, '767778': 1, 'tempor labore n': 1, 'AVAILABLE': 1, 'swimming': 1, 'SOLD': 2, 'amet': 1, '{{petStatus}}': 1, 'Pending': 2, 'qwe': 1, 'Reserved': 1}
 ```
 
@@ -102,14 +155,14 @@ $ ./open-api-cli.py StoreApi get_inventory
 
 - ~~add the possibility to pass JSON object as cli arguement,~~
 - Handle authentication:
-  - API key
-  - Oauth
-  - Basic or Digest ?
-  - Cookie based auth?
-- add help for argument format (API Models)
+  - ~~API key~~
+  - ~~Oauth~~
+  - ~~Basic~~
+  - Cookie based auth? Maybe just add the possibility to add Cookie header, or any header?
+- ~~add help for argument format (API Models). Add 'type' subparser?~~
 - add unit tests
 - ~~add debug mode~~
 - ~~add proxy support~~
 - ~~add the possibility to disable SSL verification~~
 - add a better way to integrate with generated code
-- add a ̀`requirements.txt` ?
+- add a `requirements.txt` ?
