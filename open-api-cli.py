@@ -119,151 +119,163 @@ class ApiManager:
         return self._apis.keys()
 
 
-CALLED_CMD = ''
-CALLED_API_NAME = ''
-CALLED_METHOD_NAME = ''
-CALLED_ARGS_LIST = ()
-CALLED_TYPE = ''
+class OpenApiCli:
 
+    API_CMD_LABEL = 'api'
+    MODEL_CMD_LABEL = 'model'
 
-def callback_model_generator(model_name):
-    def model_subparser_callback(args):
-        global CALLED_CMD
-        CALLED_CMD = 'type'
-        global CALLED_TYPE
-        CALLED_TYPE = model_name
-    return model_subparser_callback
+    def __init__(self):
+        self.called_cmd = ''
+        self.called_api_name = ''
+        self.called_method_name = ''
+        self.called_args_list = {}
+        self.called_type = ''
+        self.api_manager = None
 
+    def __callback_model_generator(self, model_name):
+        def model_subparser_callback(args):
+            self.called_cmd = OpenApiCli.MODEL_CMD_LABEL
+            self.called_type = model_name
+        return model_subparser_callback
 
-def callback_api_generator(api_name, method_name, params):
-    def api_subparser_callback(args):
-        global CALLED_CMD
-        CALLED_CMD = 'api'
-        global CALLED_API_NAME
-        CALLED_API_NAME = api_name
-        global CALLED_METHOD_NAME
-        CALLED_METHOD_NAME = method_name
-        global CALLED_ARGS_LIST
-        CALLED_ARGS_LIST = params
-    return api_subparser_callback
+    def __callback_api_generator(self, api_name, method_name, params):
+        def api_subparser_callback(args):
+            self.called_cmd = OpenApiCli.API_CMD_LABEL
+            self.called_api_name = api_name
+            self.called_method_name = method_name
+            self.called_args_list = params
+        return api_subparser_callback
 
+    def __display_model_help(self, model_name):
+        model_swagger_definition = self.api_manager.model_manager.get_model_swagger_definition(model_name)
+        print(json.dumps(model_swagger_definition, indent=4))
 
-api_manager = None
+    def __execute_api_method(self, api_name, method_name, param_list, args):
+        proxy = args.proxy
+        verify_ssl = args.insecure
+        debug = args.verbose
+        access_token = args.access_token
+        basic = args.basic
+        if basic:
+            basic = json.loads(basic)
+        api_key = args.api_key
 
+        configuration = swagger_client.Configuration()
+        configuration.proxy = proxy
+        configuration.verify_ssl = False if verify_ssl else True
+        configuration.debug = True if debug else False
+        if basic:
+            configuration.username = basic.username
+            configuration.password = basic.password
+        if access_token:
+            configuration.access_token = access_token
+        if api_key:
+            configuration.api_key['api_key'] = api_key
 
-def display_model_help(model_name):
-    model_swagger_definition = api_manager.model_manager.get_model_swagger_definition(model_name)
-    print(json.dumps(model_swagger_definition, indent=4))
+        self.api_manager = ApiManager(configuration)
 
+        params = ()
+        for param in param_list:
+            value = getattr(args, param['name'])
+            if param['type'] == 'str':
+                params = (*params, value)
+            else:
+                params = (*params, json.loads(value))
 
-def execute_api_method(api_name, method_name, param_list, args):
-    proxy = args.proxy
-    verify_ssl = args.insecure
-    debug = args.verbose
-    access_token = args.access_token
-    basic = args.basic
-    if basic:
-        basic = json.loads(basic)
-    api_key = args.api_key
+        try:
+            result = self.api_manager.get_api_method(api_name, method_name)(*params, **dict())
+            if debug:
+                print('body:')
+            print(result)
+        except swagger_client.rest.ApiException as ex:
+            errprint('Exception: ' + str(ex))
 
-    configuration = swagger_client.Configuration()
-    configuration.proxy = proxy
-    configuration.verify_ssl = False if verify_ssl else True
-    configuration.debug = True if debug else False
-    if basic:
-        configuration.username = basic.username
-        configuration.password = basic.password
-    if access_token:
-        configuration.access_token = access_token
-    if api_key:
-        configuration.api_key['api_key'] = api_key
+    def __build_api_command_parser(self, parser, api_choice_list):
+        api_parsers = parser.add_parser(OpenApiCli.API_CMD_LABEL)
+        api_parsers.add_argument('-X', '--proxy', help='Proxy url (for example: \'http://localhost:8080\')')
+        api_parsers.add_argument('-k', '--insecure', help='Disable SSL verification (use at your own risks!)',
+                                 action='store_true')
+        api_parsers.add_argument('-v', '--verbose', help='Display debug infos', action='store_true')
+        authentication_group = api_parsers.add_mutually_exclusive_group(required=False)
+        authentication_group.add_argument('--access_token', help='Access token')
+        authentication_group.add_argument('--basic',
+                                          help='Basic authentication. Format: \"{\"username\": '
+                                               '\"the_user_name\", \"password\": \"the_password\"}\"')
+        authentication_group.add_argument('--api_key', help='The API Key.')
+        apis_subparsers = api_parsers.add_subparsers(title='API',
+                                                     description='The API you want to interact with',
+                                                     required=True)
+        for api_choice in api_choice_list:
+            api_parser = apis_subparsers.add_parser(api_choice)
+            api_method_list = self.api_manager.get_api_method_list(api_choice)
+            api_subparsers = api_parser.add_subparsers(title='Method',
+                                                       description='The kind of interaction you want with your API',
+                                                       required=True)
+            for api_method in api_method_list:
+                api_method_description = self.api_manager.get_method_description(api_choice, api_method)
+                api_subparser = api_subparsers.add_parser(api_method, help=api_method_description)
+                method_param = self.api_manager.get_method_parameters(api_choice, api_method)
+                param_list = []
+                for param in method_param:
+                    api_subparser.add_argument('--' + param['name'].lower(),
+                                               help='' + param['description'] + '  (type: ' + param['type'] + ')',
+                                               required=True)
+                    param_list.append({'name': param['name'].lower(),
+                                       'type': param['type']})
 
-    global api_manager
-    api_manager = ApiManager(configuration)
+                api_subparser.set_defaults(func=self.__callback_api_generator(api_choice, api_method, param_list))
 
-    params = ()
-    for param in param_list:
-        value = getattr(args, param['name'])
-        if param['type'] == 'str':
-            params = (*params, value)
-        else:
-            params = (*params, json.loads(value))
+        return api_parsers
 
-    try:
-        result = api_manager.get_api_method(api_name, method_name)(*params, **dict())
-        if debug:
-            print('body:')
-        print(result)
-    except swagger_client.rest.ApiException as ex:
-        errprint('Exception: ' + str(ex))
+    def __build_model_command_parser(self, parser):
+        model_parsers = parser.add_parser(OpenApiCli.MODEL_CMD_LABEL)
+        model_helper_subparser = model_parsers.add_subparsers(title='Model helper',
+                                                              description='Model helper: display model expected format',
+                                                              required=True)
+        model_list = self.api_manager.model_manager.get_model_list()
+        for model in model_list:
+            model_parser = model_helper_subparser.add_parser(model)
+            model_parser.set_defaults(func=self.__callback_model_generator(model))
 
+        return model_parsers
 
-def main():
-    global api_manager
-    api_manager = ApiManager(swagger_client.Configuration())
-    api_choice_list = api_manager.get_api_list()
+    def run(self, argv):
+        self.api_manager = ApiManager(swagger_client.Configuration())
+        api_choice_list = self.api_manager.get_api_list()
 
-    parser = argparse.ArgumentParser(description='Rest API command line interface.')
+        parser = argparse.ArgumentParser(description='Rest API command line interface.')
 
-    subparsers = parser.add_subparsers(title='Command',
-                                       description='The command',
-                                       required=True)
-
-    api_parsers = subparsers.add_parser('api')
-    api_parsers.add_argument('-X', '--proxy', help='Proxy url (for example: \'http://localhost:8080\')')
-    api_parsers.add_argument('-k', '--insecure', help='Disable SSL verification (use at your own risks!)',
-                             action='store_true')
-    api_parsers.add_argument('-v', '--verbose', help='Display debug infos', action='store_true')
-    authentication_group = api_parsers.add_mutually_exclusive_group(required=False)
-    authentication_group.add_argument('--access_token', help='Access token')
-    authentication_group.add_argument('--basic',
-                                      help='Basic authentication. Format: \'{\'username\': '
-                                           '\'the_user_name\', \'password\': \'the_password\'}\'')
-    authentication_group.add_argument('--api_key', help='The API Key.')
-    apis_subparsers = api_parsers.add_subparsers(title='API',
-                                                 description='The API you want to interact with',
-                                                 required=True)
-
-    # ---- Model helper
-    model_parser = subparsers.add_parser('model')
-    model_helper_subparser = model_parser.add_subparsers(title='Model helper',
-                                                         description='Model helper: display model expected format',
-                                                         required=True)
-    model_list = api_manager.model_manager.get_model_list()
-    for model in model_list:
-        model_parser = model_helper_subparser.add_parser(model)
-        model_parser.set_defaults(func=callback_model_generator(model))
-    # ---- end model helper
-
-    for api_choice in api_choice_list:
-        api_parser = apis_subparsers.add_parser(api_choice)
-        api_method_list = api_manager.get_api_method_list(api_choice)
-        api_subparsers = api_parser.add_subparsers(title='Method',
-                                                   description='The kind of interaction you want with your API',
-                                                   required=True)
-        for api_method in api_method_list:
-            api_method_description = api_manager.get_method_description(api_choice, api_method)
-            api_subparser = api_subparsers.add_parser(api_method, help=api_method_description)
-            method_param = api_manager.get_method_parameters(api_choice, api_method)
-            param_list = []
-            for param in method_param:
-                api_subparser.add_argument('--' + param['name'].lower(),
-                                           help='' + param['description'] + '  (type: ' + param['type'] + ')',
+        subparsers = parser.add_subparsers(title='Command',
+                                           description='The command',
                                            required=True)
-                param_list.append({'name': param['name'].lower(),
-                                   'type': param['type']})
 
-            api_subparser.set_defaults(func=callback_api_generator(api_choice, api_method, param_list))
+        api_parsers = self.__build_api_command_parser(subparsers, api_choice_list)
+        model_parsers = self.__build_model_command_parser(subparsers)
 
-    argcomplete.autocomplete(parser)
-    args = parser.parse_args()
-    args.func(args)
+        argcomplete.autocomplete(parser)
+        args = {}
+        # argparse throw exception if there's only required subparse and no command is provided
+        # we have to handle it ourselves.
+        try:
+            args = parser.parse_args(argv)
+            args.func(args)
+        except TypeError:
+            if len(sys.argv) >= 2:
+                if sys.argv[1] == OpenApiCli.MODEL_CMD_LABEL:
+                    model_parsers.print_help()
+                    exit(-1)
+                else:
+                    api_parsers.print_help()
+                    exit(-1)
+            parser.print_help()
+            exit(-1)
 
-    if CALLED_CMD == 'type':
-        display_model_help(CALLED_TYPE)
-    else:
-        execute_api_method(CALLED_API_NAME, CALLED_METHOD_NAME, CALLED_ARGS_LIST, args)
+        if self.called_cmd == OpenApiCli.MODEL_CMD_LABEL:
+            self.__display_model_help(self.called_type)
+        if self.called_cmd == OpenApiCli.API_CMD_LABEL:
+            self.__execute_api_method(self.called_api_name, self.called_method_name, self.called_args_list, args)
 
 
 if __name__ == "__main__":
-    main()
+    open_api_cli = OpenApiCli()
+    open_api_cli.run(sys.argv[1:])

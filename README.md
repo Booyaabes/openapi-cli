@@ -4,9 +4,44 @@
 
 From an OpenAPI / Swagger you can generate a Python client. OpenAPI CLI is intended to make a CLI from this client.
 
+## Requirements
+
+- Python 3.x
+- argcomplete (tested with 1.10.0)
+
 ## How to use
 
-From an OpenAPI / Swagger generate a Python client. Add `open-api.cli.py` from the current repository to the generated client. You can now acces your API from your bash and pipe result to anything you want! Use tab for autocompletion.
+First, you have to generate a Python client with [swagger-codegen](https://github.com/swagger-api/swagger-codegen). 
+For example:
+
+```sh
+sudo docker run --rm -v ${PWD}:/local swaggerapi/swagger-codegen-cli:2.4.7 generate \
+    -i http://petstore.swagger.io/v2/swagger.json \
+    -l python \
+    -o /local/out/python
+```
+
+Then you copy `open-api-cli.py` at the root directory of the generated Python client:
+
+```sh
+$ cp open-api-cli.py out/python/
+$ cd out/python/
+$ ./open-api-cli.py --help
+```
+
+If needed, you can add argcomplete in your generated Python client as follow:
+
+```sh
+$ echo "argcomplete" >> requirements.txt
+[ ... or ... ]
+$ echo "argcomplete >= 1.10.0" >> requirements.txt
+```
+
+And then install all needed requirements:
+
+```sh
+$ pip3 install -r requirements.txt
+```
 
 ## Security Disclaimer
 
