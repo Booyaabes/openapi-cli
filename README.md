@@ -11,7 +11,8 @@ From an OpenAPI / Swagger you can generate a Python client. OpenAPI CLI is inten
 
 ## How to use
 
-First, you have to generate a Python client with [swagger-codegen](https://github.com/swagger-api/swagger-codegen). 
+First, you have to generate a Python client, from [Swagger Editor](https://editor.swagger.io/) or with [swagger-codegen](https://github.com/swagger-api/swagger-codegen). 
+
 For example:
 
 ```sh
@@ -195,6 +196,7 @@ $ ./open-api-cli.py api StoreApi get_inventory
   - ~~Basic~~
   - Cookie based auth? Maybe just add the possibility to add Cookie header, or any header?
 - ~~add help for argument format (API Models). Add 'type' subparser?~~
+- ~~add the possibility to change the host url~~
 - add unit tests
 - ~~add debug mode~~
 - ~~add proxy support~~

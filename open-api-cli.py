@@ -159,6 +159,7 @@ class OpenApiCli:
         if basic:
             basic = json.loads(basic)
         api_key = args.api_key
+        url = args.url
 
         configuration = swagger_client.Configuration()
         configuration.proxy = proxy
@@ -171,6 +172,8 @@ class OpenApiCli:
             configuration.access_token = access_token
         if api_key:
             configuration.api_key['api_key'] = api_key
+        if url:
+            configuration.host = url
 
         self.api_manager = ApiManager(configuration)
 
@@ -196,6 +199,7 @@ class OpenApiCli:
         api_parsers.add_argument('-k', '--insecure', help='Disable SSL verification (use at your own risks!)',
                                  action='store_true')
         api_parsers.add_argument('-v', '--verbose', help='Display debug infos', action='store_true')
+        api_parsers.add_argument('-u', '--url', help='Server url. For example \'--url https://my_server.io:8443\'')
         authentication_group = api_parsers.add_mutually_exclusive_group(required=False)
         authentication_group.add_argument('--access_token', help='Access token')
         authentication_group.add_argument('--basic',
@@ -239,7 +243,7 @@ class OpenApiCli:
 
         return model_parsers
 
-    def run(self, argv):
+    def run(self, argv=sys.argv[1:]):
         self.api_manager = ApiManager(swagger_client.Configuration())
         api_choice_list = self.api_manager.get_api_list()
 
@@ -254,7 +258,7 @@ class OpenApiCli:
 
         argcomplete.autocomplete(parser)
         args = {}
-        # argparse throw exception if there's only required subparse and no command is provided
+        # argparse throw exception if there's only required subparsers and no command is provided
         # we have to handle it ourselves.
         try:
             args = parser.parse_args(argv)
@@ -278,4 +282,4 @@ class OpenApiCli:
 
 if __name__ == "__main__":
     open_api_cli = OpenApiCli()
-    open_api_cli.run(sys.argv[1:])
+    open_api_cli.run()
