@@ -212,6 +212,7 @@ $ ./open-api-cli.py api StoreApi get_inventory
 - ~~add help for argument format (API Models). Add 'type' subparser?~~
 - ~~add the possibility to change the host url~~
 - add unit tests
+- ~~Make `--host` mandatory, if not server url not set in swagger,~~
 - ~~add debug mode~~
 - ~~add proxy support~~
 - ~~add the possibility to disable SSL verification~~

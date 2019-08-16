@@ -199,7 +199,14 @@ class OpenApiCli:
         api_parsers.add_argument('-k', '--insecure', help='Disable SSL verification (use at your own risks!)',
                                  action='store_true')
         api_parsers.add_argument('-v', '--verbose', help='Display debug infos', action='store_true')
-        api_parsers.add_argument('-u', '--url', help='Server url. For example \'--url https://my_server.io:8443\'')
+        if self.api_manager.configuration.host:
+            api_parsers.add_argument('-u', '--url',
+                                     help='Server url. For example \'--url https://my_server.io:8443\'. Default value: '
+                                          + self.api_manager.configuration.host)
+        else:
+            api_parsers.add_argument('-u', '--url',
+                                     help='Server url. For example \'--url https://my_server.io:8443\'',
+                                     required=True)
         authentication_group = api_parsers.add_mutually_exclusive_group(required=False)
         authentication_group.add_argument('--access_token', help='Access token')
         authentication_group.add_argument('--basic',
