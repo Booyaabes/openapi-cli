@@ -6,7 +6,7 @@ From an OpenAPI / Swagger you can generate a Python client. OpenAPI CLI is inten
 
 ## Requirements
 
-- Python 3.x
+- Python 3.7+
 - argcomplete (tested with 1.10.0)
 
 ## How to use
@@ -42,6 +42,20 @@ And then install all needed requirements:
 
 ```sh
 $ pip3 install -r requirements.txt
+```
+
+A Dockerfile is available to build a image that contains all needed requirements. You can build it as follow:
+
+```sh
+$ sudo docker build -t open-api-cli:0.1 .
+```
+
+To use it:
+
+```sh
+$ sudo docker run -it --rm -v $(pwd)/petstore-python-client:/app:ro open-api-cli:0.1
+$ user@900e050de182:/app$ open-api-cli.py api StoreApi get_inventory 
+{'sold': 15, 'string': 6, 'avaliable': 1, 'pending': 6, 'available': 204, 'HEHEHE': 1}
 ```
 
 ## Security Disclaimer
