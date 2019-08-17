@@ -9,6 +9,10 @@ From an OpenAPI / Swagger you can generate a Python client. OpenAPI CLI is inten
 - Python 3.7+
 - argcomplete (tested with 1.10.0)
 
+Or for the Docker version:
+
+- Docker 1.13+
+
 ## How to use
 
 First, you have to generate a Python client, from [Swagger Editor](https://editor.swagger.io/) or with [swagger-codegen](https://github.com/swagger-api/swagger-codegen). 
@@ -56,6 +60,12 @@ To use it:
 $ sudo docker run -it --rm -v $(pwd)/petstore-python-client:/app:ro open-api-cli:0.1
 $ user@900e050de182:/app$ open-api-cli.py api StoreApi get_inventory 
 {'sold': 15, 'string': 6, 'avaliable': 1, 'pending': 6, 'available': 204, 'HEHEHE': 1}
+```
+
+A automated build is available at [Docker Hub](https://hub.docker.com/r/booyaabes/open-api-cli):
+
+```sh
+$ sudo docker pull booyaabes/open-api-cli:latest
 ```
 
 ## Security Disclaimer
