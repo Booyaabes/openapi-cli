@@ -1,0 +1,8 @@
+.dockerignore
+.git/
+.gitignore
+Dockerfile
+LICENSE
+python-client/
+README.md
+test/
