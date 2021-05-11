@@ -51,18 +51,18 @@ $ pip3 install -r requirements.txt
 A Dockerfile is available to build a image that contains all needed requirements. You can build it as follow:
 
 ```sh
-$ sudo docker build -t open-api-cli:0.1 .
+$ sudo docker build -t openapi-cli:0.1 .
 ```
 
 To use it:
 
 ```sh
-$ sudo docker run -it --rm -v $(pwd)/petstore-python-client:/app:ro open-api-cli:0.1
+$ sudo docker run -it --rm -v $(pwd)/petstore-python-client:/app:ro openapi-cli:0.1
 $ user@900e050de182:/app$ openapi-cli.py api StoreApi get_inventory 
 {'sold': 15, 'string': 6, 'avaliable': 1, 'pending': 6, 'available': 204, 'HEHEHE': 1}
 ```
 
-A automated build is available at [Docker Hub](https://hub.docker.com/r/booyaabes/open-api-cli):
+A automated build is available at [Docker Hub](https://hub.docker.com/r/booyaabes/openapi-cli):
 
 ```sh
 $ sudo docker pull booyaabes/open-api-cli:latest
