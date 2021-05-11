@@ -1,4 +1,4 @@
-FROM python:3.7.4-buster
+FROM python:3.9-buster
 
 RUN useradd -ms /bin/bash user
 
@@ -9,7 +9,7 @@ RUN wget https://raw.githubusercontent.com/swagger-api/swagger-codegen/4607a90d7
     pip install -r requirements.txt && rm -f requirements.txt && \
     mkdir /home/user/.bash_completion.d && \
     activate-global-python-argcomplete --dest=/home/user/.bash_completion.d/ && \
-    echo "source ~/.bash_completion.d/python-argcomplete.sh" >> /home/user/.bashrc
+    echo "source ~/.bash_completion.d/python-argcomplete" >> /home/user/.bashrc
 
 USER user
 
