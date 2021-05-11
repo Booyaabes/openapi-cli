@@ -20,8 +20,8 @@ First, you have to generate a Python client, from [Swagger Editor](https://edito
 For example:
 
 ```sh
-sudo docker run --rm -v ${PWD}:/local swaggerapi/swagger-codegen-cli:2.4.7 generate \
-    -i http://petstore.swagger.io/v2/swagger.json \
+sudo docker run --rm -v ${PWD}:/local swaggerapi/swagger-codegen-cli:latest generate \
+    -i https://petstore.swagger.io/v2/swagger.json \
     -l python \
     -o /local/out/python
 ```
@@ -198,17 +198,36 @@ Example of usages, and return values:
 
 ```sh
 $ ./open-api-cli.py api PetApi get_pet_by_id --pet_id 1
-{'category': {'id': 1, 'name': 'string'},
- 'id': 1,
- 'name': 'cat',
- 'photo_urls': ['string'],
- 'status': 'available',
- 'tags': [{'id': 1, 'name': 'string'}]}
+{"id":1,"category":{"id":1,"name":"String"},"name":"String","photoUrls":["string"],"tags":[{"id":10,"name":"String"}],"status":"available"}
 ```
 
 ```sh
 $ ./open-api-cli.py api StoreApi get_inventory
-{'sold': 193, 'ksks': 1, 'c': 1, 'string': 1, 'Operated': 4, 'unavailable': 2, 'velit ': 1, 'Nonavailable': 1, 'pending': 175, 'Not-Operated': 10, 'available': 345, 'PENDING': 1, 'Not Found': 1, '767778': 1, 'tempor labore n': 1, 'AVAILABLE': 1, 'swimming': 1, 'SOLD': 2, 'amet': 1, '{{petStatus}}': 1, 'Pending': 2, 'qwe': 1, 'Reserved': 1}
+{"sold":5,"string":289,"alive":1,"Nonavailable":1,"pending":14,"available":657,"hehe":1,"adopted":1}
+```
+
+You can pipe the result to `jq`:
+
+```shell
+$ ./open-api-cli.py api PetApi find_pets_by_status --status '["available"]' | jq ".[0]"
+{
+  "id": 9222968140498485000,
+  "category": {
+    "id": 0,
+    "name": "string"
+  },
+  "name": "fish",
+  "photoUrls": [
+    "string"
+  ],
+  "tags": [
+    {
+      "id": 0,
+      "name": "string"
+    }
+  ],
+  "status": "available"
+}
 ```
 
 ## TODO
@@ -222,7 +241,7 @@ $ ./open-api-cli.py api StoreApi get_inventory
 - ~~add help for argument format (API Models). Add 'type' subparser?~~
 - ~~add the possibility to change the host url~~
 - add unit tests
-- ~~Make `--host` mandatory, if not server url not set in swagger,~~
+- ~~Make `--host` mandatory, if default server url is not set in swagger,~~
 - ~~add debug mode~~
 - ~~add proxy support~~
 - ~~add the possibility to disable SSL verification~~

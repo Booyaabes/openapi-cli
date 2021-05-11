@@ -186,10 +186,13 @@ class OpenApiCli:
                 params = (*params, json.loads(value))
 
         try:
-            result = self.api_manager.get_api_method(api_name, method_name)(*params, **dict())
+            kwargs = dict()
+            kwargs['_preload_content'] = False
+            result = self.api_manager.get_api_method(api_name, method_name)(*params, **kwargs)
             if debug:
                 print('body:')
-            print(result)
+            print(result.data.decode('utf-8'))
+            result.release_conn()
         except swagger_client.rest.ApiException as ex:
             errprint('Exception: ' + str(ex))
 
@@ -250,7 +253,7 @@ class OpenApiCli:
 
         return model_parsers
 
-    def run(self, argv=sys.argv[1:]):
+    def run(self, argv):
         self.api_manager = ApiManager(swagger_client.Configuration())
         api_choice_list = self.api_manager.get_api_list()
 
@@ -289,4 +292,4 @@ class OpenApiCli:
 
 if __name__ == "__main__":
     open_api_cli = OpenApiCli()
-    open_api_cli.run()
+    open_api_cli.run(sys.argv[1:])
