@@ -3,6 +3,8 @@
 
 import argparse
 import json
+import os
+
 import argcomplete
 from swagger_client import api as api_list
 from swagger_client import models
@@ -277,17 +279,18 @@ class OpenApiCli:
             if len(sys.argv) >= 2:
                 if sys.argv[1] == OpenApiCli.MODEL_CMD_LABEL:
                     model_parsers.print_help()
-                    exit(-1)
+                    os._exit(-1)
                 else:
                     api_parsers.print_help()
-                    exit(-1)
+                    os._exit(-1)
             parser.print_help()
-            exit(-1)
+            os._exit(-1)
 
         if self.called_cmd == OpenApiCli.MODEL_CMD_LABEL:
             self.__display_model_help(self.called_type)
         if self.called_cmd == OpenApiCli.API_CMD_LABEL:
             self.__execute_api_method(self.called_api_name, self.called_method_name, self.called_args_list, args)
+        os._exit(0)
 
 
 if __name__ == "__main__":

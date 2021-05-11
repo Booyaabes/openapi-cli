@@ -29,9 +29,9 @@ sudo docker run --rm -v ${PWD}:/local swaggerapi/swagger-codegen-cli:latest gene
 Then you copy `open-api-cli.py` at the root directory of the generated Python client:
 
 ```sh
-$ cp open-api-cli.py out/python/
+$ cp openapi-cli.py out/python/
 $ cd out/python/
-$ ./open-api-cli.py --help
+$ ./openapi-cli.py --help
 ```
 
 If needed, you can add argcomplete in your generated Python client as follow:
@@ -58,7 +58,7 @@ To use it:
 
 ```sh
 $ sudo docker run -it --rm -v $(pwd)/petstore-python-client:/app:ro open-api-cli:0.1
-$ user@900e050de182:/app$ open-api-cli.py api StoreApi get_inventory 
+$ user@900e050de182:/app$ openapi-cli.py api StoreApi get_inventory 
 {'sold': 15, 'string': 6, 'avaliable': 1, 'pending': 6, 'available': 204, 'HEHEHE': 1}
 ```
 
@@ -85,8 +85,8 @@ Examples with [PetStore API](https://petstore.swagger.io/#/).
 Help displays available API:
 
 ```sh
-$ ./open-api-cli.py --help
-usage: open-api-cli.py [-h] {api,model} ...
+$ ./openapi-cli.py --help
+usage: openapi-cli.py [-h] {api,model} ...
 
 Rest API command line interface.
 
@@ -102,8 +102,8 @@ Command:
 Type help displays defined types:
 
 ```sh
-$ ./open-api-cli.py model --help
-usage: open-api-cli.py model [-h]
+$ ./openapi-cli.py model --help
+usage: openapi-cli.py model [-h]
                              {ApiResponse,Body,Body1,Category,Order,Pet,Tag,User}
                              ...
 
@@ -119,7 +119,7 @@ Model helper:
 Display Pet type format:
 
 ```sh
-$ ./open-api-cli.py model Pet
+$ ./openapi-cli.py model Pet
 {
     "id": "int",
     "category": "Category",
@@ -133,8 +133,8 @@ $ ./open-api-cli.py model Pet
 Display the help to select an API:
 
 ```sh
-$ ./open-api-cli.py api --help
-usage: open-api-cli.py api [-h] [-X PROXY] [-k] [-v]
+$ ./openapi-cli.py api --help
+usage: openapi-cli.py api [-h] [-X PROXY] [-k] [-v]
                            [--access_token ACCESS_TOKEN | --basic BASIC | --api_key API_KEY]
                            {PetApi,StoreApi,UserApi} ...
 
@@ -159,8 +159,8 @@ API:
 API help displays available actions:
 
 ```sh
-$ ./open-api-cli.py api PetApi --help
-usage: open-api-cli.py api PetApi [-h]
+$ ./openapi-cli.py api PetApi --help
+usage: openapi-cli.py api PetApi [-h]
                                   {add_pet,delete_pet,find_pets_by_status,find_pets_by_tags,get_pet_by_id,update_pet,update_pet_with_form,upload_file}
                                   ...
 
@@ -186,8 +186,8 @@ Method:
 Action help displays arguments:
 
 ```sh
-./open-api-cli.py api PetApi get_pet_by_id --help
-usage: open-api-cli.py api PetApi get_pet_by_id [-h] --pet_id PET_ID
+./openapi-cli.py api PetApi get_pet_by_id --help
+usage: openapi-cli.py api PetApi get_pet_by_id [-h] --pet_id PET_ID
 
 optional arguments:
   -h, --help       show this help message and exit
@@ -197,19 +197,19 @@ optional arguments:
 Example of usages, and return values:
 
 ```sh
-$ ./open-api-cli.py api PetApi get_pet_by_id --pet_id 1
+$ ./openapi-cli.py api PetApi get_pet_by_id --pet_id 1
 {"id":1,"category":{"id":1,"name":"String"},"name":"String","photoUrls":["string"],"tags":[{"id":10,"name":"String"}],"status":"available"}
 ```
 
 ```sh
-$ ./open-api-cli.py api StoreApi get_inventory
+$ ./openapi-cli.py api StoreApi get_inventory
 {"sold":5,"string":289,"alive":1,"Nonavailable":1,"pending":14,"available":657,"hehe":1,"adopted":1}
 ```
 
 You can pipe the result to `jq`:
 
 ```shell
-$ ./open-api-cli.py api PetApi find_pets_by_status --status '["available"]' | jq ".[0]"
+$ ./openapi-cli.py api PetApi find_pets_by_status --status '["available"]' | jq ".[0]"
 {
   "id": 9222968140498485000,
   "category": {

@@ -17,6 +17,6 @@ WORKDIR /app
 
 ENV PYTHONPATH=/app
 
-ADD open-api-cli.py /usr/local/bin/.
+ADD openapi-cli.py /usr/local/bin/.
 
 ENTRYPOINT ["/bin/bash"]
